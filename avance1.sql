@@ -10,46 +10,91 @@ GO
 SP_HELPDB DBCEDAR --Visualizar la existencia de la base de datos
 GO
 
-CREATE TABLE Origen(
-
-	OrigenID INT PRIMARY KEY,
-    NombreOrigen varchar(120) UNIQUE,
-    DireccionOrigen varchar(200)
+create table TBRemitente(
+	RemitenteID varchar(25) PRIMARY KEY,
+    RemitenteNombre varchar(200),
+    RemitenteApellidos varchar(200),
+    RemitenteCorreo varchar(350),
+    RemitenteTelefono varchar(9),
+    EstadoID_FK int ,
+	OrigenID_FK INT,
+    FOREIGN KEY (EstadoID_FK) references TBEstadoEnvio(EstadoID),
+    FOREIGN KEY (OrigenID_FK) references TBOrigen(OrigenID) --direccion agencia
 )
 GO
 
-CREATE TABLE Destino(
+CREATE TABLE TBCliente(
+	IDCLiente int primary key, --NroIdentificacion en base a DocIdentidad (dni o ruc)//Solo bastaria con la
+	ClienteNombre varchar(30),	--Tabla Cliente para referenciar tanto emisor como destinatario.
+	ClienteApellido varchar(50),
+)
+GO
+
+CREATE TABLE TBEstadoEnvio(
+	EstadoID int primary key ,
+    EstadoDescripcion varchar(30)
+)
+GO
+
+CREATE TABLE TBOrigen(
+	OrigenID INT PRIMARY KEY IDENTITY(1,1),
+    OrigenNombre varchar(120) UNIQUE,
+    OrigenDireccion varchar(200)
+)
+GO
+
+CREATE TABLE TBDestino(
 	DestinoID INT PRIMARY KEY,
-	NombreDestino VARCHAR(120) UNIQUE,
-	DireccionDestino VARCHAR(120) UNIQUE
+	DestinoNombre VARCHAR(120) UNIQUE,
+	DestinoDireccion VARCHAR(120) UNIQUE
+)
+GO
+
+
+
+
+CREATE TABLE TBDestinatario(
+	DestinatarioID varchar(11) primary key, -- pero como introduzco este id y como lo identifico
+    DestinatarioNombres varchar(200),		--si no todos son con DNI ????
+    DestinatarioApellidos varchar(200),
+    correo_destinatario varchar(350),
+    telefono_destinatario varchar(9),
+    direccion_destinatario varchar(900),
+    
+    id_estado_fk int, foreign key (id_estado_fk) references estado(id_estado),
+    id_lugar_fk int, foreign key (id_lugar_fk) references lugar(id_lugar)
+)
+GO
+
+CREATE TABLE TBEncomiendaGarantia(  -- Es necesario colocar tabla garantia?
+	GaratiaID int primary key,
+    garantia varchar(100)
 )
 
-create table CargoEmpleado(
+create table TBCargoEmpleado(					
 	CargoID int primary key ,
-    NombreCargo varchar(200) unique,
-    DescripcionCargo varchar(700)
-);
+    CargoNombres varchar(200) unique,
+    CargoDescripcion varchar(700)
+)
+GO
 
-create table Estado(
-	id_estado int primary key ,
-    nombre_estado varchar(30)
-);
+--Es necesario crear la tabla estado?
+--Donde cada estado tiene su id 
+		-- tipo : ID 1 DESCP RECEPCIONADO
+		--		: ID 2 DESCP EN RUTA 
+		--		: ID 3 DESCP ENTREGADO
 
-
-create table tipo_entrega(
-	id_entrega int primary key auto_increment,
-    tipo_entrega varchar(100)
-); 
+CREATE TABLE TBTipoEntrega(
+	id_entrega int primary key ,    -- ID O     
+    tipo_entrega varchar(100)		-- CONTRAENTREGA
+)
+GO
 
 create table forma_pago(
-	id_forma_pago int primary key auto_increment,
+	id_forma_pago int primary key ,
     forma_pago varchar(100)
-);
-
-create table garantia(
-	id_garantia int primary key auto_increment,
-    garantia varchar(100)
-);
+)
+GO
 
 create table Empleado(
 	EmpleadoID varchar(8) primary key,
@@ -61,18 +106,32 @@ create table Empleado(
     id_cargo_fk int, foreign key (id_rol_fk) references CargoEmpleado(CargoID),
     id_estado_fk int, foreign key (id_estado_fk) references estado(id_estado),
     id_lugar_fk int, foreign key (id_lugar_fk) references lugar(id_lugar)
-);
+)
+
 
 create table caracteristica(
-	id_caracteristica int primary key auto_increment,
+	id_caracteristica int primary key ,
     caracteristica varchar(30)
-);
+)
+
+create table encomienda(
+	EncomiendaID varchar(20) primary key,
+    EncomiendaPeso decimal(10,2),
+    EncomiendaAltura decimal(10,2),
+    EncomiendaAncho decimal(10,2),
+    EncomiendaLargo decimal(10,2),
+    id_estado_fk int, foreign key (id_estado_fk) references estadoEncomienda(id_estado),
+    id_garantia_fk int, foreign key (id_garantia_fk) references garantia(id_garantia),
+    id_caracteristica_fk int, foreign key (id_caracteristica_fk) references caracteristica(id_caracteristica)
+    
+    -- REMITENTE llenar con datos foraneos de la tabla remitente
+    -- DESTINATARIO llenar con datos foraneos de la tabla  remtente 
+)
 
 create table estadoEncomienda(
 	id_estado int primary key auto_increment,
     nombre_estado varchar(30)
 );
-
 
 CREATE TABLE tipo_remitente (
     id_tipo_remitente int primary key auto_increment,
@@ -84,50 +143,8 @@ CREATE TABLE tipo_destinatario (
     nombre_tipo varchar(50)
 );
 
-
-create table remitente(
-	id_remitente varchar(11) primary key,
-    nombre_remitente varchar(200),
-    apellido_pat_remitente varchar(200),
-    apellido_mat_remitente varchar(200),
-    correo_remitente varchar(350),
-    telefono_remitente varchar(9),
-    
-    id_estado_fk int, foreign key (id_estado_fk) references estado(id_estado),
-    id_lugar_fk int, foreign key (id_lugar_fk) references lugar(id_lugar)
-);
-
-
-create table destinatario(
-	id_destinatario varchar(11) primary key,
-    nombre_destinatario varchar(200),
-    apellido_pat_destinatario varchar(200),
-    apellido_mat_destinatario varchar(200),
-    correo_destinatario varchar(350),
-    telefono_destinatario varchar(9),
-    direccion_destinatario varchar(900),
-    
-    id_estado_fk int, foreign key (id_estado_fk) references estado(id_estado),
-    id_lugar_fk int, foreign key (id_lugar_fk) references lugar(id_lugar)
-);
-
-create table encomienda(
-	id_encomienda varchar(20) primary key,
-    peso_encomienda decimal(10,2),
-    altura_encomienda decimal(10,2),
-    ancho_encomienda decimal(10,2),
-    largo_encomienda decimal(10,2),
-	
-    id_estado_fk int, foreign key (id_estado_fk) references estadoEncomienda(id_estado),
-    id_garantia_fk int, foreign key (id_garantia_fk) references garantia(id_garantia),
-    id_caracteristica_fk int, foreign key (id_caracteristica_fk) references caracteristica(id_caracteristica)
-    
-    -- REMITENTE
-    -- DESTINATARIO
-);
-
 CREATE TABLE relacion_encomienda (
-    id_relacion int primary key auto_increment,
+    id_relacion int primary key ,
     id_encomienda varchar(20),
     id_remitente varchar(11),
     id_destinatario varchar(11),
